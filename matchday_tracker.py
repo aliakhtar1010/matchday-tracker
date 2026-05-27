@@ -2,7 +2,7 @@ import csv
 import os
 
 FILE_NAME = "matches.csv"
-HEADERS = ["player", "goals", "assists", "result"]
+HEADERS = ["player", "opponent", "goals", "assists", "result"]
 
 
 def create_file_if_missing():
@@ -38,13 +38,18 @@ def add_match():
     if player == "":
         player = "Unknown"
 
+    opponent = input("Opponent: ").strip()
+
+    if opponent == "":
+        opponent = "Unknown"
+
     goals = get_positive_int("Goals: ")
     assists = get_positive_int("Assists: ")
     result = get_match_result()
 
     with open(FILE_NAME, "a", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow([player, goals, assists, result])
+        writer.writerow([player, opponent, goals, assists, result])
 
     print("Match added successfully!\n")
 
