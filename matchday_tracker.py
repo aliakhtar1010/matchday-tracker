@@ -6,23 +6,26 @@ HEADERS = ["player", "opponent", "goals", "assists", "result"]
 
 
 def create_file_if_missing():
+    """Create the CSV file and add headers if it does not exist or is empty."""
     if not os.path.exists(FILE_NAME) or os.path.getsize(FILE_NAME) == 0:
-        with open(FILE_NAME, "w", newline="") as file:
+        with open(FILE_NAME, "w", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
             writer.writerow(HEADERS)
 
 
 def get_positive_int(prompt):
+    """Keep asking until the user enters a non-negative whole number."""
     while True:
-        value = input(prompt)
+        value = input(prompt).strip()
 
         if value.isdigit():
             return int(value)
 
-        print("Please enter a valid number.")
+        print("Please enter a valid non-negative whole number.")
 
 
 def get_match_result():
+    """Keep asking until the user enters Win, Loss, or Draw."""
     while True:
         result = input("Result (Win/Loss/Draw): ").strip().capitalize()
 
@@ -33,6 +36,7 @@ def get_match_result():
 
 
 def add_match():
+    """Collect match information and save it to the CSV file."""
     player = input("Player name: ").strip()
 
     if player == "":
@@ -47,7 +51,7 @@ def add_match():
     assists = get_positive_int("Assists: ")
     result = get_match_result()
 
-    with open(FILE_NAME, "a", newline="") as file:
+    with open(FILE_NAME, "a", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow([player, opponent, goals, assists, result])
 
@@ -55,20 +59,24 @@ def add_match():
 
 
 def view_matches():
-    with open(FILE_NAME, "r") as file:
+    """Display every match stored in the CSV file."""
+    with open(FILE_NAME, "r", newline="", encoding="utf-8") as file:
         reader = csv.reader(file)
-        next(reader)
+        next(reader, None)
 
         print("\nMatch History")
-        print("-" * 50)
+        print("-" * 70)
 
         has_matches = False
 
         for row in reader:
+            if len(row) < 5:
+                continue
+
             has_matches = True
             print(
-                f"Player: {row[0]} | Goals: {row[1]} | "
-                f"Assists: {row[2]} | Result: {row[3]}"
+                f"Player: {row[0]} | Opponent: {row[1]} | "
+                f"Goals: {row[2]} | Assists: {row[3]} | Result: {row[4]}"
             )
 
         if not has_matches:
@@ -78,6 +86,7 @@ def view_matches():
 
 
 def show_summary():
+    """Calculate and display total and average performance statistics."""
     total_goals = 0
     total_assists = 0
     total_matches = 0
@@ -85,20 +94,29 @@ def show_summary():
     losses = 0
     draws = 0
 
-    with open(FILE_NAME, "r") as file:
+    with open(FILE_NAME, "r", newline="", encoding="utf-8") as file:
         reader = csv.reader(file)
-        next(reader)
+        next(reader, None)
 
         for row in reader:
-            total_goals += int(row[1])
-            total_assists += int(row[2])
+            if len(row) < 5:
+                continue
+
+            try:
+                goals = int(row[2])
+                assists = int(row[3])
+            except ValueError:
+                continue
+
+            total_goals += goals
+            total_assists += assists
             total_matches += 1
 
-            if row[3] == "Win":
+            if row[4] == "Win":
                 wins += 1
-            elif row[3] == "Loss":
+            elif row[4] == "Loss":
                 losses += 1
-            elif row[3] == "Draw":
+            elif row[4] == "Draw":
                 draws += 1
 
     print("\nPerformance Summary")
@@ -121,6 +139,7 @@ def show_summary():
 
 
 def main():
+    """Run the main menu until the user chooses to exit."""
     create_file_if_missing()
 
     while True:
@@ -130,7 +149,7 @@ def main():
         print("3. Show summary")
         print("4. Exit")
 
-        choice = input("Choose an option: ")
+        choice = input("Choose an option: ").strip()
 
         if choice == "1":
             add_match()
