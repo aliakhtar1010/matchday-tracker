@@ -2,7 +2,15 @@ import csv
 import os
 
 FILE_NAME = "matches.csv"
-HEADERS = ["player", "date", "opponent", "goals", "assists", "result"]
+HEADERS = [
+    "player",
+    "date",
+    "opponent",
+    "minutes",
+    "goals",
+    "assists",
+    "result",
+]
 
 
 def create_file_if_missing():
@@ -52,13 +60,16 @@ def add_match():
     if opponent == "":
         opponent = "Unknown"
 
+    minutes = get_positive_int("Minutes played: ")
     goals = get_positive_int("Goals: ")
     assists = get_positive_int("Assists: ")
     result = get_match_result()
 
     with open(FILE_NAME, "a", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
-        writer.writerow([player, date, opponent, goals, assists, result])
+        writer.writerow(
+            [player, date, opponent, minutes, goals, assists, result]
+        )
 
     print("Match added successfully!\n")
 
@@ -70,12 +81,12 @@ def view_matches():
         next(reader, None)
 
         print("\nMatch History")
-        print("-" * 90)
+        print("-" * 110)
 
         has_matches = False
 
         for row in reader:
-            if len(row) < 6:
+            if len(row) < 7:
                 continue
 
             has_matches = True
@@ -84,9 +95,10 @@ def view_matches():
                 f"Player: {row[0]} | "
                 f"Date: {row[1]} | "
                 f"Opponent: {row[2]} | "
-                f"Goals: {row[3]} | "
-                f"Assists: {row[4]} | "
-                f"Result: {row[5]}"
+                f"Minutes: {row[3]} | "
+                f"Goals: {row[4]} | "
+                f"Assists: {row[5]} | "
+                f"Result: {row[6]}"
             )
 
         if not has_matches:
@@ -100,6 +112,7 @@ def show_summary():
     total_goals = 0
     total_assists = 0
     total_matches = 0
+    total_minutes = 0
 
     wins = 0
     losses = 0
@@ -110,30 +123,33 @@ def show_summary():
         next(reader, None)
 
         for row in reader:
-            if len(row) < 6:
+            if len(row) < 7:
                 continue
 
             try:
-                goals = int(row[3])
-                assists = int(row[4])
+                minutes = int(row[3])
+                goals = int(row[4])
+                assists = int(row[5])
             except ValueError:
                 continue
 
+            total_minutes += minutes
             total_goals += goals
             total_assists += assists
             total_matches += 1
 
-            if row[5] == "Win":
+            if row[6] == "Win":
                 wins += 1
-            elif row[5] == "Loss":
+            elif row[6] == "Loss":
                 losses += 1
-            elif row[5] == "Draw":
+            elif row[6] == "Draw":
                 draws += 1
 
     print("\nPerformance Summary")
     print("-" * 50)
 
     print(f"Total Matches: {total_matches}")
+    print(f"Total Minutes: {total_minutes}")
     print(f"Total Goals: {total_goals}")
     print(f"Total Assists: {total_assists}")
     print(f"Record: {wins}W - {losses}L - {draws}D")
