@@ -6,6 +6,8 @@ HEADERS = [
     "player",
     "date",
     "opponent",
+    "team_score",
+    "opponent_score",
     "minutes",
     "goals",
     "assists",
@@ -32,17 +34,6 @@ def get_positive_int(prompt):
         print("Please enter a valid non-negative whole number.")
 
 
-def get_match_result():
-    """Keep asking until the user enters Win, Loss, or Draw."""
-    while True:
-        result = input("Result (Win/Loss/Draw): ").strip().capitalize()
-
-        if result in ["Win", "Loss", "Draw"]:
-            return result
-
-        print("Please enter Win, Loss, or Draw.")
-
-
 def add_match():
     """Collect match information and save it to the CSV file."""
     player = input("Player name: ").strip()
@@ -60,18 +51,36 @@ def add_match():
     if opponent == "":
         opponent = "Unknown"
 
+    team_score = get_positive_int("Your team's score: ")
+    opponent_score = get_positive_int("Opponent's score: ")
     minutes = get_positive_int("Minutes played: ")
     goals = get_positive_int("Goals: ")
     assists = get_positive_int("Assists: ")
-    result = get_match_result()
+
+    if team_score < opponent_score:
+        result = "Loss"
+    elif team_score > opponent_score:
+        result = "Win"
+    else:
+        result = "Draw"
 
     with open(FILE_NAME, "a", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(
-            [player, date, opponent, minutes, goals, assists, result]
+            [
+                player,
+                date,
+                opponent,
+                team_score,
+                opponent_score,
+                minutes,
+                goals,
+                assists,
+                result,
+            ]
         )
 
-    print("Match added successfully!\n")
+    print(f"Match added successfully! Result: {result}\n")
 
 
 def view_matches():
@@ -81,12 +90,12 @@ def view_matches():
         next(reader, None)
 
         print("\nMatch History")
-        print("-" * 110)
+        print("-" * 130)
 
         has_matches = False
 
         for row in reader:
-            if len(row) < 7:
+            if len(row) < 9:
                 continue
 
             has_matches = True
@@ -95,10 +104,11 @@ def view_matches():
                 f"Player: {row[0]} | "
                 f"Date: {row[1]} | "
                 f"Opponent: {row[2]} | "
-                f"Minutes: {row[3]} | "
-                f"Goals: {row[4]} | "
-                f"Assists: {row[5]} | "
-                f"Result: {row[6]}"
+                f"Score: {row[3]}-{row[4]} | "
+                f"Minutes: {row[5]} | "
+                f"Goals: {row[6]} | "
+                f"Assists: {row[7]} | "
+                f"Result: {row[8]}"
             )
 
         if not has_matches:
@@ -123,13 +133,13 @@ def show_summary():
         next(reader, None)
 
         for row in reader:
-            if len(row) < 7:
+            if len(row) < 9:
                 continue
 
             try:
-                minutes = int(row[3])
-                goals = int(row[4])
-                assists = int(row[5])
+                minutes = int(row[5])
+                goals = int(row[6])
+                assists = int(row[7])
             except ValueError:
                 continue
 
@@ -138,11 +148,11 @@ def show_summary():
             total_assists += assists
             total_matches += 1
 
-            if row[6] == "Win":
+            if row[8] == "Win":
                 wins += 1
-            elif row[6] == "Loss":
+            elif row[8] == "Loss":
                 losses += 1
-            elif row[6] == "Draw":
+            elif row[8] == "Draw":
                 draws += 1
 
     print("\nPerformance Summary")
