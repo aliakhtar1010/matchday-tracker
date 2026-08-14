@@ -118,7 +118,7 @@ def view_matches():
 
 
 def show_summary():
-    """Calculate and display total and average performance statistics."""
+    """Calculate and display performance statistics."""
     total_goals = 0
     total_assists = 0
     total_matches = 0
@@ -155,6 +155,8 @@ def show_summary():
             elif row[8] == "Draw":
                 draws += 1
 
+    total_goal_contributions = total_goals + total_assists
+
     print("\nPerformance Summary")
     print("-" * 50)
 
@@ -162,16 +164,35 @@ def show_summary():
     print(f"Total Minutes: {total_minutes}")
     print(f"Total Goals: {total_goals}")
     print(f"Total Assists: {total_assists}")
+    print(f"Goal Contributions: {total_goal_contributions}")
     print(f"Record: {wins}W - {losses}L - {draws}D")
 
     if total_matches > 0:
+        win_percentage = (wins / total_matches) * 100
         avg_goals = total_goals / total_matches
         avg_assists = total_assists / total_matches
 
+        print(f"Win Rate: {win_percentage:.1f}%")
         print(f"Average Goals per Match: {avg_goals:.2f}")
         print(f"Average Assists per Match: {avg_assists:.2f}")
     else:
+        print("Win Rate: 0.0%")
         print("No matches recorded yet.")
+
+    if total_minutes > 0:
+        goals_per_90 = (total_goals / total_minutes) * 90
+        assists_per_90 = (total_assists / total_minutes) * 90
+        goal_contributions_per_90 = (
+            total_goal_contributions / total_minutes
+        ) * 90
+
+        print(f"Goals / 90: {goals_per_90:.2f}")
+        print(f"Assists / 90: {assists_per_90:.2f}")
+        print(f"G+A / 90: {goal_contributions_per_90:.2f}")
+    else:
+        print("Goals / 90: 0.00")
+        print("Assists / 90: 0.00")
+        print("G+A / 90: 0.00")
 
     print()
 
